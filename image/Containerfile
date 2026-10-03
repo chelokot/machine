@@ -1,0 +1,13 @@
+ARG BASE=quay.io/shadowblue/main-nvidia:latest
+FROM ${BASE}
+
+COPY image/repos/ /etc/yum.repos.d/
+COPY image/packages.txt /usr/share/machine/packages.txt
+RUN sed 's/#.*//' /usr/share/machine/packages.txt | xargs dnf -y install && \
+    dnf clean all && \
+    rm -rf /var/lib/dnf /var/cache/libdnf5 /var/cache/ldconfig /var/log/dnf5.log /run/dnf
+
+COPY image/files/ /
+RUN systemctl enable nix.mount nix-daemon.socket && \
+    systemctl --global enable podman.socket && \
+    bootc container lint

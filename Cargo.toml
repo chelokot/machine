@@ -10,8 +10,7 @@ repository = "https://github.com/chelokot/machine"
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }
 rustix = { version = "1", features = ["process"] }
-
-[dev-dependencies]
+serde_json = "1"
 tempfile = "3"
 
 [profile.release]

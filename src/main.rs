@@ -2,14 +2,14 @@ use std::env;
 use std::fs::{self, OpenOptions};
 use std::io::Write;
 use std::os::unix::process::CommandExt;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Command, ExitCode, Stdio};
 
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, bail};
 use clap::{Parser, Subcommand};
-use machine::record::{self, Action, Change, Manager, Target};
-
-const TOOLBOX_REMOTE: &str = "https://github.com/chelokot/fedora-toolbox.git";
+use machine::desktop;
+use machine::git::{Checkout, Repo};
+use machine::record::{self, Action, Change, Manager};
 
 #[derive(Parser)]
 #[command(version, about = "Declarative, self-recording Fedora Silverblue workstation")]
@@ -28,6 +28,12 @@ enum Commands {
     },
     #[command(hide = true)]
     Apply { manager: Manager, action: Action, specs: Vec<String> },
+    #[command(about = "Commit the current GNOME settings, extensions and flatpaks to the machine repository")]
+    Capture,
+    #[command(about = "Capture local changes, pull the machine repository and apply it with home-manager")]
+    Sync,
+    #[command(about = "Clone the machine repository and apply a host configuration for the first time")]
+    Bootstrap { host: String },
 }
 
 struct Account {
@@ -56,18 +62,15 @@ fn sudo_account() -> Result<Option<Account>> {
     }))
 }
 
-fn toolbox_target(home: PathBuf) -> Target {
-    Target {
-        checkout: env::var_os("MACHINE_TOOLBOX_REPO").map_or_else(|| home.join(".local/share/fedora-toolbox"), PathBuf::from),
-        remote: env::var("MACHINE_TOOLBOX_REMOTE").unwrap_or_else(|_| TOOLBOX_REMOTE.to_owned()),
-    }
-}
-
 fn action_name(action: Action) -> &'static str {
     match action {
         Action::Add => "add",
         Action::Remove => "remove",
     }
+}
+
+fn home() -> Result<PathBuf> {
+    Ok(PathBuf::from(env::var("HOME").context("HOME is not set")?))
 }
 
 fn record(manager: Manager, args: &[String]) -> Result<()> {
@@ -102,22 +105,24 @@ fn record(manager: Manager, args: &[String]) -> Result<()> {
     }
     command.spawn()?;
     eprintln!(
-        "machine: recording {} {} ({}) -> chelokot/fedora-toolbox",
+        "machine: recording {} {} ({}) -> {}",
         action_name(change.action),
         change.specs.join(" "),
-        manager.name()
+        manager.name(),
+        manager.repo().name()
     );
     Ok(())
 }
 
 fn apply(change: Change) -> Result<()> {
-    let home = PathBuf::from(env::var("HOME")?);
-    let result = record::apply(&toolbox_target(home.clone()), &change);
+    let home = home()?;
+    let result = record::apply(&change.manager.repo().target(&home), &change);
     if let Err(error) = &result {
         let log = home.join(".local/state/machine/record.log");
         fs::create_dir_all(log.parent().context("log path has no parent")?)?;
+        let mut file = OpenOptions::new().create(true).append(true).open(log)?;
         writeln!(
-            OpenOptions::new().create(true).append(true).open(log)?,
+            file,
             "{} {} {}: {error:#}",
             change.manager.name(),
             action_name(change.action),
@@ -127,10 +132,69 @@ fn apply(change: Change) -> Result<()> {
     result
 }
 
+fn switch(root: &Path, host: &str) -> Result<()> {
+    let flake = format!("{}#{}@{host}", root.display(), env::var("USER").context("USER is not set")?);
+    let status = Command::new("nix")
+        .args([
+            "run",
+            &format!("{}#home-manager", root.display()),
+            "--",
+            "switch",
+            "-b",
+            "backup",
+            "--flake",
+            &flake,
+        ])
+        .status()
+        .context("nix is not available")?;
+    if !status.success() {
+        bail!("home-manager switch --flake {flake} failed");
+    }
+    Ok(())
+}
+
+fn state(home: &Path) -> PathBuf {
+    home.join(".local/state/machine")
+}
+
+fn capture(checkout: &Checkout, home: &Path, host: &str) -> Result<bool> {
+    desktop::capture(&checkout.root, &state(home))?;
+    checkout.commit(&desktop::CAPTURED, &format!("Capture desktop state of {host}"))
+}
+
+fn host(home: &Path) -> Result<String> {
+    let path = home.join(".config/machine/host");
+    Ok(fs::read_to_string(&path)
+        .with_context(|| format!("{} is missing, run machine bootstrap <host> first", path.display()))?
+        .trim()
+        .to_owned())
+}
+
 fn main() -> ExitCode {
     let result = match Cli::parse().command {
         Commands::Record { manager, args } => record(manager, &args),
         Commands::Apply { manager, action, specs } => apply(Change { manager, action, specs }),
+        Commands::Capture => home().and_then(|home| {
+            let checkout = Checkout::open(&Repo::Machine.target(&home))?;
+            capture(&checkout, &home, &host(&home)?)?;
+            checkout.pull()?;
+            checkout.push()
+        }),
+        Commands::Sync => home().and_then(|home| {
+            let host = host(&home)?;
+            let checkout = Checkout::open(&Repo::Machine.target(&home))?;
+            capture(&checkout, &home, &host)?;
+            checkout.pull()?;
+            checkout.push()?;
+            switch(&checkout.root, &host)?;
+            desktop::apply(&checkout.root, &state(&home))
+        }),
+        Commands::Bootstrap { host } => home().and_then(|home| {
+            let checkout = Checkout::open(&Repo::Machine.target(&home))?;
+            checkout.pull()?;
+            switch(&checkout.root, &host)?;
+            desktop::apply(&checkout.root, &state(&home))
+        }),
     };
     match result {
         Ok(()) => ExitCode::SUCCESS,

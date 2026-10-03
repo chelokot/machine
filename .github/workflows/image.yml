@@ -1,0 +1,71 @@
+name: image
+
+on:
+  push:
+    branches: [ main ]
+    paths: [ image/**, .github/workflows/image.yml ]
+  pull_request:
+    paths: [ image/**, .github/workflows/image.yml ]
+  workflow_dispatch: {}
+  schedule:
+    # shadowblue publishes around 09:30 UTC
+    - cron: '30 11 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - variant: main
+            base: quay.io/shadowblue/main:latest
+          - variant: nvidia
+            base: quay.io/shadowblue/main-nvidia:latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    env:
+      IMAGE: ghcr.io/${{ github.repository_owner }}/machine
+    steps:
+      - name: Free disk space
+        run: sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL
+
+      - uses: actions/checkout@v4
+
+      - id: build
+        uses: redhat-actions/buildah-build@v2
+        with:
+          containerfiles: image/Containerfile
+          build-args: BASE=${{ matrix.base }}
+          image: ${{ env.IMAGE }}
+          tags: ${{ matrix.variant }} ${{ matrix.variant }}-${{ github.sha }}
+          oci: true
+
+      - if: github.event_name != 'pull_request'
+        id: push
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build.outputs.image }}
+          tags: ${{ steps.build.outputs.tags }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - if: github.event_name != 'pull_request'
+        uses: sigstore/cosign-installer@v3
+
+      - if: github.event_name != 'pull_request'
+        name: Sign image
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | cosign login ghcr.io --username "${{ github.actor }}" --password-stdin
+          cosign sign --yes "${IMAGE}@${{ steps.push.outputs.digest }}"
+
+      - if: github.event_name != 'pull_request'
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ${{ env.IMAGE }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true

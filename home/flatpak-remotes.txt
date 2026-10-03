@@ -1,0 +1,5 @@
+system flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+user chelotype https://chelokot.com/flatpak/chelotype.flatpakrepo
+user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+user flatpark https://dl.flatpark.org/flatpark.flatpakrepo
+user sele-origin https://chipi-chapa-corp.github.io/sele/flatpak/sele.flatpakrepo

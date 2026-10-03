@@ -1,0 +1,4 @@
+nix
+nix-daemon
+python3.12
+temurin-21-jdk

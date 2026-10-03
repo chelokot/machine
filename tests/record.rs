@@ -2,7 +2,11 @@ use std::fs;
 use std::path::Path;
 use std::process::Command;
 
-use machine::record::{Action, Change, Manager, Target, apply, parse};
+use std::collections::BTreeSet;
+
+use machine::desktop::{filter_dump, merge};
+use machine::git::Target;
+use machine::record::{Action, Change, Manager, apply, parse};
 
 fn args(values: &[&str]) -> Vec<String> {
     values.iter().map(|value| value.to_string()).collect()
@@ -59,6 +63,55 @@ fn pipx_skips_editable_installs() {
         Some(change(Manager::Pipx, Action::Add, &["httpie"]))
     );
     assert_eq!(parse(Manager::Pipx, &args(&["install", "-e", "."])), None);
+}
+
+#[test]
+fn rpm_ostree_layering() {
+    assert_eq!(
+        parse(Manager::RpmOstree, &args(&["install", "--apply-live", "netbird"])),
+        Some(change(Manager::RpmOstree, Action::Add, &["netbird"]))
+    );
+    assert_eq!(
+        parse(Manager::RpmOstree, &args(&["uninstall", "netbird"])),
+        Some(change(Manager::RpmOstree, Action::Remove, &["netbird"]))
+    );
+    assert_eq!(parse(Manager::RpmOstree, &args(&["upgrade"])), None);
+}
+
+#[test]
+fn merge_records_only_local_changes_since_last_observation() {
+    let root = tempfile::tempdir().unwrap();
+    let manifest = root.path().join("flatpaks.txt");
+    let observed = root.path().join("state/flatpaks.txt");
+    fs::write(&manifest, "system flathub org.gnome.Loupe\nuser chelotype com.chelokot.Chelotype\n").unwrap();
+    let local = |entries: &[&str]| entries.iter().map(|entry| entry.to_string()).collect::<BTreeSet<String>>();
+
+    merge(
+        &manifest,
+        &observed,
+        &local(&["system flathub org.gnome.Loupe", "system flathub org.gnome.Weather"]),
+    )
+    .unwrap();
+    assert_eq!(
+        fs::read_to_string(&manifest).unwrap(),
+        "system flathub org.gnome.Loupe\nsystem flathub org.gnome.Weather\nuser chelotype com.chelokot.Chelotype\n"
+    );
+
+    merge(&manifest, &observed, &local(&["system flathub org.gnome.Weather"])).unwrap();
+    assert_eq!(
+        fs::read_to_string(&manifest).unwrap(),
+        "system flathub org.gnome.Weather\nuser chelotype com.chelokot.Chelotype\n"
+    );
+}
+
+#[test]
+fn dconf_dump_drops_ignored_keys_and_empty_sections() {
+    let dump = "[/]\ncolor-scheme='prefer-dark'\nwindow-size=(1, 2)\n\n[window-state]\ninitial-size=(3, 4)\n\n[keybindings]\nmaximize=@as []\n";
+    let ignored = vec!["window-size".to_owned(), "initial-size*".to_owned()];
+    assert_eq!(
+        filter_dump(dump, &ignored),
+        "[/]\ncolor-scheme='prefer-dark'\n\n[keybindings]\nmaximize=@as []\n"
+    );
 }
 
 fn git(directory: &Path, arguments: &[&str]) -> String {

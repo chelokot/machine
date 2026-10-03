@@ -1,0 +1,14 @@
+[Unit]
+Description=Persistent Nix store
+Requires=nix-directory.service
+After=nix-directory.service
+Before=nix-daemon.socket nix-daemon.service systemd-tmpfiles-setup.service
+
+[Mount]
+What=/var/lib/nix
+Where=/nix
+Type=none
+Options=bind
+
+[Install]
+WantedBy=local-fs.target

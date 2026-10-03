@@ -1,0 +1,100 @@
+{
+  "nodes": {
+    "exposedcat-dotfiles": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1779226736,
+        "narHash": "sha256-cbaPRFXqhU1G/ry43H/HMppLITeLAxG/D/nxc1pxmes=",
+        "owner": "ExposedCat",
+        "repo": "dotfiles",
+        "rev": "0b9071e95f67f67dabb917d761a4fa2948c1148e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ExposedCat",
+        "repo": "dotfiles",
+        "rev": "0b9071e95f67f67dabb917d761a4fa2948c1148e",
+        "type": "github"
+      }
+    },
+    "fedora-toolbox": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1791052145,
+        "narHash": "sha256-njl568lglbZkHHMFVNuctwV40cUp1I2tEhUCqbsFA2s=",
+        "owner": "chelokot",
+        "repo": "fedora-toolbox",
+        "rev": "efda5163a45d4ca98f5fc01b66b5455689f94527",
+        "type": "github"
+      },
+      "original": {
+        "owner": "chelokot",
+        "repo": "fedora-toolbox",
+        "type": "github"
+      }
+    },
+    "home-manager": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790989254,
+        "narHash": "sha256-ZN+riaeFuE+DZ5zfqJiXlM12jLwZzeIXiNkU1YeHMXI=",
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "rev": "acd21c5a3420a9d5fd0ed06299b10828267ef9ba",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1790822859,
+        "narHash": "sha256-69xHQhAeMAD2wDXO7T2pcOZIF9Sga2W+JkmY2a11Ops=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "c59305bab2065cfecc4944690d9eedbb56f3a9fa",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "exposedcat-dotfiles": "exposedcat-dotfiles",
+        "fedora-toolbox": "fedora-toolbox",
+        "home-manager": "home-manager",
+        "nixpkgs": "nixpkgs",
+        "starship-show-on-command": "starship-show-on-command"
+      }
+    },
+    "starship-show-on-command": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1779356165,
+        "narHash": "sha256-L5OFTZWKuL46U9M9AC9TDN+dCvO/vAY1pcvNuAYGJCQ=",
+        "owner": "chelokot",
+        "repo": "starship-show-on-command.fish",
+        "rev": "54e752f87da1d83318da1bb987df4eea9a211d29",
+        "type": "github"
+      },
+      "original": {
+        "owner": "chelokot",
+        "repo": "starship-show-on-command.fish",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
