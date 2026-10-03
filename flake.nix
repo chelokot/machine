@@ -74,6 +74,23 @@
 
       checks.${system} = {
         inherit machine;
+        fish-prompt =
+          pkgs.runCommand "fish-prompt-check"
+            {
+              nativeBuildInputs = [
+                pkgs.fish
+                pkgs.starship
+              ];
+              files = "${self.homeConfigurations."chelokot@laptop".activationPackage}/home-files";
+            }
+            ''
+              export HOME=$TMPDIR XDG_CONFIG_HOME=$TMPDIR/.config COLUMNS=80
+              cp -rL $files/.config $XDG_CONFIG_HOME
+              fish --interactive --command fish_prompt > prompt 2> errors
+              if [ -s errors ]; then cat errors; exit 1; fi
+              grep -q . prompt
+              cp prompt $out
+            '';
         quadlet =
           pkgs.runCommand "quadlet-check"
             {

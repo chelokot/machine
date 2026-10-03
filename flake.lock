@@ -20,11 +20,11 @@
     "fedora-toolbox": {
       "flake": false,
       "locked": {
-        "lastModified": 1791052145,
-        "narHash": "sha256-njl568lglbZkHHMFVNuctwV40cUp1I2tEhUCqbsFA2s=",
+        "lastModified": 1791069816,
+        "narHash": "sha256-Z478G+dsE5lngMQFz5F20Dz4wZJ0cJN0L7LLrv1K9oY=",
         "owner": "chelokot",
         "repo": "fedora-toolbox",
-        "rev": "efda5163a45d4ca98f5fc01b66b5455689f94527",
+        "rev": "2dffe2b9aaf3b38e7d84e11cc858ca615edcf075",
         "type": "github"
       },
       "original": {
