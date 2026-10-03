@@ -1,4 +1,9 @@
-{ machine, host, ... }:
+{
+  config,
+  machine,
+  host,
+  ...
+}:
 {
   imports = [
     ./shell.nix
@@ -15,7 +20,12 @@
     packages = [ machine ];
   };
 
-  targets.genericLinux.enable = true;
+  targets.genericLinux = {
+    enable = true;
+    gpu.enable = false;
+  };
+  news.display = "silent";
   programs.home-manager.enable = true;
+  home.shellAliases.home-manager = "home-manager --flake ${config.home.homeDirectory}/.local/share/machine#chelokot@${host}";
   xdg.configFile."machine/host".text = host;
 }
