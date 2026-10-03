@@ -58,7 +58,7 @@ Recording failures are logged to `~/.local/state/machine/record.log`; `MACHINE_R
 The host image is signed with the key in `image/files/etc/pki/containers/chelokot-machine.pub` (the private key exists only as the `SIGNING_SECRET` Actions secret). The image ships a `sigstoreSigned` policy for `ghcr.io/chelokot/machine`, so once a machine runs it, `ostree-image-signed:` updates are verified by rpm-ostree/bootc on every pull:
 
 ```sh
-cosign verify --key image/files/etc/pki/containers/chelokot-machine.pub ghcr.io/chelokot/machine:nvidia
+cosign verify --new-bundle-format=false --key image/files/etc/pki/containers/chelokot-machine.pub ghcr.io/chelokot/machine:nvidia
 gh attestation verify oci://ghcr.io/chelokot/machine:nvidia --owner chelokot
 ```
 
