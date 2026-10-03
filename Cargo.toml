@@ -1,0 +1,21 @@
+[package]
+name = "machine"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+description = "Declarative, self-recording Fedora Silverblue workstation"
+repository = "https://github.com/chelokot/machine"
+
+[dependencies]
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+rustix = { version = "1", features = ["process"] }
+
+[dev-dependencies]
+tempfile = "3"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"
