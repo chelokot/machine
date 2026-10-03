@@ -1,1 +1,2 @@
+blur-my-shell@aunetx
 notification-configurator@exposedcat
