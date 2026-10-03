@@ -31,3 +31,11 @@ jobs:
       - uses: DeterminateSystems/update-flake-lock@main
         with:
           pr-title: Update flake.lock
+
+  keepalive:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - uses: liskin/gh-workflow-keepalive@v1
