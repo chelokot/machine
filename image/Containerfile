@@ -8,6 +8,9 @@ RUN sed 's/#.*//' /usr/share/machine/packages.txt | xargs dnf -y install && \
     rm -rf /var/lib/dnf /var/cache/libdnf5 /var/cache/ldconfig /var/log/dnf5.log /run/dnf
 
 COPY image/files/ /
-RUN systemctl enable nix.mount nix-daemon.socket && \
+RUN jq '.transports.docker["ghcr.io/chelokot/machine"] = [{"type": "sigstoreSigned", "keyPath": "/etc/pki/containers/chelokot-machine.pub", "signedIdentity": {"type": "matchRepository"}}]' \
+      /etc/containers/policy.json > /etc/containers/policy.json.new && \
+    mv /etc/containers/policy.json.new /etc/containers/policy.json && \
+    systemctl enable nix.mount nix-daemon.socket && \
     systemctl --global enable podman.socket && \
     bootc container lint

@@ -59,9 +59,12 @@ jobs:
 
       - if: github.event_name != 'pull_request'
         name: Sign image
+        env:
+          COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
+          COSIGN_PASSWORD: ''
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | cosign login ghcr.io --username "${{ github.actor }}" --password-stdin
-          cosign sign --yes "${IMAGE}@${{ steps.push.outputs.digest }}"
+          cosign sign --yes --key env://COSIGN_PRIVATE_KEY "${IMAGE}@${{ steps.push.outputs.digest }}"
 
       - if: github.event_name != 'pull_request'
         uses: actions/attest-build-provenance@v2

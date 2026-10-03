@@ -21,8 +21,12 @@ Every layer of a machine is described by public, content-addressed artifacts tha
 
 ## New machine
 
+From any Fedora Atomic desktop (drop locally layered packages the image already provides with `--uninstall`):
+
 ```sh
-sudo bootc switch ghcr.io/chelokot/machine:nvidia   # or :main for AMD/Intel
+sudo rpm-ostree rebase ostree-unverified-registry:ghcr.io/chelokot/machine:nvidia   # or :main for AMD/Intel
+systemctl reboot
+sudo rpm-ostree rebase ostree-image-signed:docker://ghcr.io/chelokot/machine:nvidia # every update is now signature-checked
 systemctl reboot
 ```
 
@@ -51,9 +55,17 @@ Recording failures are logged to `~/.local/state/machine/record.log`; `MACHINE_R
 
 ## Verifying artifacts
 
+The host image is signed with the key in `image/files/etc/pki/containers/chelokot-machine.pub` (the private key exists only as the `SIGNING_SECRET` Actions secret). The image ships a `sigstoreSigned` policy for `ghcr.io/chelokot/machine`, so once a machine runs it, `ostree-image-signed:` updates are verified by rpm-ostree/bootc on every pull:
+
 ```sh
-cosign verify ghcr.io/chelokot/machine:nvidia \
-  --certificate-identity-regexp 'https://github.com/chelokot/machine/' \
-  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+cosign verify --key image/files/etc/pki/containers/chelokot-machine.pub ghcr.io/chelokot/machine:nvidia
 gh attestation verify oci://ghcr.io/chelokot/machine:nvidia --owner chelokot
+```
+
+The CLI and dev container images are signed keylessly through GitHub OIDC:
+
+```sh
+cosign verify ghcr.io/chelokot/fedora-toolbox:latest \
+  --certificate-identity-regexp 'https://github.com/chelokot/fedora-toolbox/' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com
 ```
