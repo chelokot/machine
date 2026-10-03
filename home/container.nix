@@ -19,8 +19,8 @@ in
       UserNS = "keep-id";
       SecurityLabelDisable = true;
       Network = "host";
-      Ipc = "host";
       PodmanArgs = [
+        "--ipc=host"
         "--pid=host"
         "--privileged"
         "--ulimit=host"
@@ -46,7 +46,7 @@ in
     Install.WantedBy = "default.target";
   };
 
-  home.activation.devContainer = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  home.activation.devContainer = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
     run /usr/bin/systemctl --user daemon-reload
     run /usr/bin/systemctl --user start ${name}.service
   '';

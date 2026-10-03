@@ -74,6 +74,17 @@
 
       checks.${system} = {
         inherit machine;
+        quadlet =
+          pkgs.runCommand "quadlet-check"
+            {
+              nativeBuildInputs = [ pkgs.podman ];
+              unit = "${self.homeConfigurations."chelokot@laptop".activationPackage}/home-files/.config/containers/systemd";
+            }
+            ''
+              export HOME=$TMPDIR XDG_RUNTIME_DIR=$TMPDIR
+              QUADLET_UNIT_DIRS=$unit ${pkgs.podman}/libexec/podman/quadlet --user --dryrun > $out 2> errors
+              ! grep -E "unsupported|error" errors || (cat errors; exit 1)
+            '';
       }
       // lib.genAttrs' hosts (
         host: lib.nameValuePair "home-${host}" self.homeConfigurations."chelokot@${host}".activationPackage
