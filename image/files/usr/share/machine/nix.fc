@@ -1,0 +1,7 @@
+/nix(/.*)?	system_u:object_r:usr_t:s0
+/nix/store/[^/]+/s?bin(/.*)?	system_u:object_r:bin_t:s0
+/nix/store/[^/]+/lib(/.*)?	system_u:object_r:lib_t:s0
+/nix/store/[^/]+/etc(/.*)?	system_u:object_r:etc_t:s0
+/nix/store/[^/]+/share/man(/.*)?	system_u:object_r:man_t:s0
+/nix/var(/.*)?	system_u:object_r:var_lib_t:s0
+/nix/var/nix/daemon-socket(/.*)?	system_u:object_r:var_run_t:s0

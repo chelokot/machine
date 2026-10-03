@@ -11,6 +11,7 @@ COPY image/files/ /
 RUN jq '.transports.docker["ghcr.io/chelokot/machine"] = [{"type": "sigstoreSigned", "keyPath": "/etc/pki/containers/chelokot-machine.pub", "signedIdentity": {"type": "matchRepository"}}]' \
       /etc/containers/policy.json > /etc/containers/policy.json.new && \
     mv /etc/containers/policy.json.new /etc/containers/policy.json && \
+    tee -a /etc/selinux/targeted/contexts/files/file_contexts.local /etc/selinux/targeted/active/file_contexts.local < /usr/share/machine/nix.fc > /dev/null && \
     systemctl enable nix.mount nix-daemon.socket && \
     systemctl --global enable podman.socket && \
     bootc container lint
