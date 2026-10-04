@@ -179,7 +179,16 @@ pub fn export_container_apps(root: &Path, home: &Path, user: &str) -> Result<()>
         }
         let entry = run("podman", &["exec", CONTAINER, "cat", &desktop_file])?;
         let candidates = ICON_CANDIDATES.map(|pattern| pattern.replace("{}", app)).join(" ");
-        let found = run("podman", &["exec", CONTAINER, "sh", "-c", &format!("for path in {candidates}; do [ -f \"$path\" ] && echo \"$path\" && break; done")])?;
+        let found = run(
+            "podman",
+            &[
+                "exec",
+                CONTAINER,
+                "sh",
+                "-c",
+                &format!("for path in {candidates}; do [ -f \"$path\" ] && echo \"$path\" && break; done"),
+            ],
+        )?;
         let icon = match found.trim() {
             "" => None,
             source => {
