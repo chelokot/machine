@@ -9,10 +9,15 @@ let
     text = ''
       unallocated="$(/usr/bin/btrfs filesystem usage -b /var/home 2>/dev/null | awk '/Device unallocated:/ { print $3 }')"
       metadata_free="$(/usr/bin/btrfs filesystem df -b /var/home | awk -F'[=,]' '/^Metadata/ { print $3 - $5 }')"
-      if (( unallocated < 20 * 1024 ** 3 && metadata_free < 4 * 1024 ** 3 )); then
-        notify-send --urgency=critical --app-name=machine "Disk metadata is running out" \
-          "Unallocated $((unallocated / 1024 ** 2)) MiB, metadata free $((metadata_free / 1024 ** 2)) MiB. Run: sudo btrfs balance start -dusage=50 /var/home"
+      if (( unallocated < 2 * 1024 ** 3 && metadata_free < 1024 ** 3 )); then
+        urgency=critical
+      elif (( unallocated < 20 * 1024 ** 3 && metadata_free < 4 * 1024 ** 3 )); then
+        urgency=normal
+      else
+        exit 0
       fi
+      notify-send --urgency="$urgency" --app-name=machine "Disk metadata is running low" \
+        "Unallocated $((unallocated / 1024 ** 2)) MiB, metadata free $((metadata_free / 1024 ** 2)) MiB. The weekly btrfs-balance fixes this; to do it now: sudo btrfs balance start -dusage=50 /var/home"
     '';
   };
 in
