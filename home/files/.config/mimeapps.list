@@ -1,0 +1,18 @@
+[Added Associations]
+x-scheme-handler/sms=org.gnome.Shell.Extensions.GSConnect.desktop;
+x-scheme-handler/tel=org.gnome.Shell.Extensions.GSConnect.desktop;
+x-scheme-handler/http=app.zen_browser.zen.desktop;
+application/xhtml+xml=app.zen_browser.zen.desktop;
+text/html=app.zen_browser.zen.desktop;
+x-scheme-handler/https=app.zen_browser.zen.desktop;
+video/mp4=io.github.diegopvlk.Cine.desktop;
+
+[Default Applications]
+x-scheme-handler/http=app.zen_browser.zen.desktop
+application/xhtml+xml=app.zen_browser.zen.desktop
+text/html=app.zen_browser.zen.desktop
+x-scheme-handler/https=app.zen_browser.zen.desktop
+x-scheme-handler/codex=dev-chatgpt.desktop
+x-scheme-handler/curseforge=curseforge.desktop
+x-scheme-handler/claude-cli=claude-code-url-handler.desktop
+video/mp4=io.github.diegopvlk.Cine.desktop

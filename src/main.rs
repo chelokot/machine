@@ -10,6 +10,7 @@ use clap::{Parser, Subcommand};
 use machine::desktop;
 use machine::git::{Checkout, Repo};
 use machine::record::{self, Action, Change, Manager};
+use machine::tools;
 
 #[derive(Parser)]
 #[command(version, about = "Declarative, self-recording Fedora Silverblue workstation")]
@@ -28,8 +29,10 @@ enum Commands {
     },
     #[command(hide = true)]
     Apply { manager: Manager, action: Action, specs: Vec<String> },
-    #[command(about = "Commit the current GNOME settings, extensions and flatpaks to the machine repository")]
+    #[command(about = "Commit the current desktop state and tools installed in home to the repositories")]
     Capture,
+    #[command(about = "List programs in home that no repository declares")]
+    Status,
     #[command(about = "Capture local changes, pull the machine repository and apply it with home-manager")]
     Sync,
     #[command(about = "Clone the machine repository and apply a host configuration for the first time")]
@@ -158,8 +161,31 @@ fn state(home: &Path) -> PathBuf {
 }
 
 fn capture(checkout: &Checkout, home: &Path, host: &str) -> Result<bool> {
-    desktop::capture(&checkout.root, &state(home))?;
+    desktop::capture(&checkout.root, home, &state(home))?;
     checkout.commit(&desktop::CAPTURED, &format!("Capture desktop state of {host}"))
+}
+
+fn capture_tools(home: &Path, host: &str) -> Result<()> {
+    let checkout = Checkout::open(&Repo::Dev.target(home))?;
+    checkout.pull()?;
+    tools::capture(&checkout.root, home, &state(home))?;
+    if checkout.commit(&tools::CAPTURED, &format!("Capture tools installed on {host}"))? {
+        checkout.push()?;
+    }
+    Ok(())
+}
+
+fn status(home: &Path) -> Result<()> {
+    let undeclared = tools::undeclared(home, &env::var("PATH").context("PATH is not set")?)?;
+    if undeclared.is_empty() {
+        println!("Everything installed in home is declared.");
+    } else {
+        println!("Installed in home but not declared:");
+        for line in undeclared {
+            println!("  {line}");
+        }
+    }
+    Ok(())
 }
 
 fn host(home: &Path) -> Result<String> {
@@ -175,17 +201,21 @@ fn main() -> ExitCode {
         Commands::Record { manager, args } => record(manager, &args),
         Commands::Apply { manager, action, specs } => apply(Change { manager, action, specs }),
         Commands::Capture => home().and_then(|home| {
+            let host = host(&home)?;
             let checkout = Checkout::open(&Repo::Machine.target(&home))?;
-            capture(&checkout, &home, &host(&home)?)?;
+            capture(&checkout, &home, &host)?;
             checkout.pull()?;
-            checkout.push()
+            checkout.push()?;
+            capture_tools(&home, &host)
         }),
+        Commands::Status => home().and_then(|home| status(&home)),
         Commands::Sync => home().and_then(|home| {
             let host = host(&home)?;
             let checkout = Checkout::open(&Repo::Machine.target(&home))?;
             capture(&checkout, &home, &host)?;
             checkout.pull()?;
             checkout.push()?;
+            capture_tools(&home, &host)?;
             switch(&checkout.root, &host)?;
             desktop::apply(&checkout.root, &state(&home))?;
             desktop::export_container_apps(&checkout.root, &home, &env::var("USER")?)

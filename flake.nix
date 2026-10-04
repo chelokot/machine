@@ -49,7 +49,10 @@
           ];
         };
         cargoLock.lockFile = ./Cargo.lock;
-        nativeCheckInputs = [ pkgs.git ];
+        nativeCheckInputs = [
+          pkgs.git
+          pkgs.go
+        ];
       };
       manifest =
         path:

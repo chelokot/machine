@@ -14,7 +14,7 @@ Every layer of a machine is described by public, content-addressed artifacts tha
 ## Principles
 
 - **Declared, not remembered.** Package lists, flatpaks, remotes, GNOME settings and extensions are plain text manifests. Nix and the image builds only read them.
-- **Recorded, not retyped.** `dnf`/`pipx`/`npm -g`/`bun -g` in the container and `rpm-ostree`/`flatpak` on the host are wrapped: a successful change is committed and pushed by `machine record` or `machine capture`. GNOME settings changed in the UI are captured by the hourly sync. Capture is a three-way merge against the last state observed on that machine, so one machine never deletes what it simply has not installed yet.
+- **Recorded, not retyped.** `dnf`/`pipx`/`npm -g`/`bun -g` in the container and `rpm-ostree`/`flatpak` on the host are wrapped: a successful change is committed and pushed by `machine record` or `machine capture`. GNOME settings changed in the UI, app config files under `home/files` (copied to the same path in `$HOME`) and `cargo install`/`uv tool install`/`go install` results in `$HOME` are captured by the hourly sync. Capture is a three-way merge against the last state observed on that machine, so one machine never deletes what it simply has not installed yet.
 - **Content-addressed and reproducible.** OCI digests for images, `flake.lock` and the Nix store for the user environment, `Cargo.lock` for the CLI.
 - **Cattle containers.** The dev container is a Quadlet unit recreated from the image on every start; a newer image is pulled hourly and applied once no process runs in the container, so nothing you leave running is ever killed; all state lives in `$HOME`, so there is no container state to drift into an improper state. `dev` opens a shell in it, host commands (`xdg-open`, `flatpak`, `systemctl`, `podman`, ...) are bridged through `host-spawn` and the podman socket.
 - **No secrets in git.** Nothing secret is captured (dconf is captured per tracked path with volatile keys filtered), gitleaks scans every push, images are signed with cosign keyless signatures from GitHub OIDC and carry build provenance, so no signing key exists anywhere.
@@ -48,7 +48,9 @@ nix run github:chelokot/machine -- bootstrap laptop # or server
 | `sudo dnf install foo` (in `dev`) | Installs now, records `foo` into `chelokot/dev` |
 | `rpm-ostree install foo` | Layers now, records `foo` into `image/packages.txt` |
 | `flatpak install ...` | Installs now, captures the flatpak list |
-| `machine capture` | Commits current GNOME settings, extensions and flatpaks |
+| `cargo install foo`, `uv tool install foo`, `go install foo@latest` | Installs now, the next sync records `foo` into `chelokot/dev` |
+| `machine capture` | Commits current GNOME settings, app config files, extensions, flatpaks and home-installed tools |
+| `machine status` | Lists programs in `$HOME` (`PATH` directories, `~/.local/opt`, `pip --user`) that no repository declares |
 | `machine sync` | Capture, pull, push, `home-manager switch`, install missing flatpaks and extensions |
 
 Recording failures are logged to `~/.local/state/machine/record.log`; `MACHINE_RECORD=0` skips recording for one command.

@@ -10,7 +10,8 @@ use crate::record::Manifest;
 pub const DCONF: &str = "home/dconf";
 pub const EXTENSIONS: &str = "home/gnome-extensions.txt";
 pub const FLATPAKS: &str = "home/flatpaks.txt";
-pub const CAPTURED: [&str; 3] = [DCONF, EXTENSIONS, FLATPAKS];
+pub const FILES: &str = "home/files";
+pub const CAPTURED: [&str; 4] = [DCONF, EXTENSIONS, FLATPAKS, FILES];
 const CONTAINER_APPS: &str = "home/container-apps.txt";
 const CONTAINER: &str = "dev";
 const EXPORT_PREFIX: &str = "dev-";
@@ -99,7 +100,21 @@ fn local_extensions() -> Result<BTreeSet<String>> {
     Ok(lines(&run("gnome-extensions", &["list", "--user"])?))
 }
 
-pub fn capture(root: &Path, state: &Path) -> Result<()> {
+pub fn capture_files(declared: &Path, local: &Path) -> Result<()> {
+    for entry in fs::read_dir(declared)? {
+        let path = entry?.path();
+        let counterpart = local.join(path.file_name().context("declared file has no name")?);
+        if path.is_dir() {
+            capture_files(&path, &counterpart)?;
+        } else if counterpart.exists() {
+            fs::copy(&counterpart, &path)?;
+        }
+    }
+    Ok(())
+}
+
+pub fn capture(root: &Path, home: &Path, state: &Path) -> Result<()> {
+    capture_files(&root.join(FILES), home)?;
     let ignored = Manifest::read(&root.join(IGNORED_KEYS))?.entries().to_vec();
     for entry in fs::read_dir(root.join(DCONF))? {
         let path = entry?.path();
