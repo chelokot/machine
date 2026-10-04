@@ -55,7 +55,11 @@ pub fn cargo_crates(home: &Path) -> Result<BTreeMap<String, Vec<String>>> {
 }
 
 pub fn uv_tools(home: &Path) -> Result<BTreeSet<String>> {
-    entries(&home.join(".local/share/uv/tools"))?.iter().map(|path| file_name(path)).collect()
+    entries(&home.join(".local/share/uv/tools"))?
+        .iter()
+        .filter(|path| path.is_dir())
+        .map(|path| file_name(path))
+        .collect()
 }
 
 fn uvarint(bytes: &[u8]) -> Option<(usize, usize)> {

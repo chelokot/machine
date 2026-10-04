@@ -51,6 +51,7 @@ fn captures_crates_io_crates_uv_tools_and_go_binaries() {
         }}"#,
     );
     fs::create_dir_all(home.join(".local/share/uv/tools/ruff")).unwrap();
+    write(&home.join(".local/share/uv/tools/.lock"), "");
     let go_build = root.path().join("go-build");
     fs::create_dir_all(&go_build).unwrap();
     write(&home.join("go/bin/hello"), "");
