@@ -9,14 +9,14 @@ Every layer of a machine is described by public, content-addressed artifacts tha
 | Host OS | `image/` (bootc, on top of `quay.io/shadowblue/main(-nvidia)`) | `image.yml`, daily | `bootc`/`rpm-ostree` staged updates |
 | User environment | `flake.nix`, `home/` (home-manager) | `nix.yml`, `flake.lock` updated weekly | `machine sync`, hourly |
 | Desktop state | `home/dconf/*.ini`, `home/flatpaks.txt`, `home/gnome-extensions.txt` | captured from the machine | `machine sync` |
-| Dev container | [`chelokot/fedora-toolbox`](https://github.com/chelokot/fedora-toolbox) | daily | Podman Quadlet `AutoUpdate=registry` |
+| Dev container | [`chelokot/dev`](https://github.com/chelokot/dev) | daily | Podman Quadlet, restarted on a newer image only when nothing runs in it |
 
 ## Principles
 
 - **Declared, not remembered.** Package lists, flatpaks, remotes, GNOME settings and extensions are plain text manifests. Nix and the image builds only read them.
 - **Recorded, not retyped.** `dnf`/`pipx`/`npm -g`/`bun -g` in the container and `rpm-ostree`/`flatpak` on the host are wrapped: a successful change is committed and pushed by `machine record` or `machine capture`. GNOME settings changed in the UI are captured by the hourly sync. Capture is a three-way merge against the last state observed on that machine, so one machine never deletes what it simply has not installed yet.
 - **Content-addressed and reproducible.** OCI digests for images, `flake.lock` and the Nix store for the user environment, `Cargo.lock` for the CLI.
-- **Cattle containers.** The dev container is a Quadlet unit recreated from the image on every start and updated daily; all state lives in `$HOME`, so there is no container state to drift into an improper state. `dev` opens a shell in it, host commands (`xdg-open`, `flatpak`, `systemctl`, `podman`, ...) are bridged through `host-spawn` and the podman socket.
+- **Cattle containers.** The dev container is a Quadlet unit recreated from the image on every start; a newer image is pulled hourly and applied once no process runs in the container, so nothing you leave running is ever killed; all state lives in `$HOME`, so there is no container state to drift into an improper state. `dev` opens a shell in it, host commands (`xdg-open`, `flatpak`, `systemctl`, `podman`, ...) are bridged through `host-spawn` and the podman socket.
 - **No secrets in git.** Nothing secret is captured (dconf is captured per tracked path with volatile keys filtered), gitleaks scans every push, images are signed with cosign keyless signatures from GitHub OIDC and carry build provenance, so no signing key exists anywhere.
 
 ## New machine
@@ -44,8 +44,8 @@ nix run github:chelokot/machine -- bootstrap laptop # or server
 
 | Command | What it does |
 | --- | --- |
-| `dev` | Shell in the `fedora-toolbox` container in the current directory |
-| `sudo dnf install foo` (in `dev`) | Installs now, records `foo` into `chelokot/fedora-toolbox` |
+| `dev` | Shell in the `dev` container in the current directory |
+| `sudo dnf install foo` (in `dev`) | Installs now, records `foo` into `chelokot/dev` |
 | `rpm-ostree install foo` | Layers now, records `foo` into `image/packages.txt` |
 | `flatpak install ...` | Installs now, captures the flatpak list |
 | `machine capture` | Commits current GNOME settings, extensions and flatpaks |
@@ -65,7 +65,7 @@ gh attestation verify oci://ghcr.io/chelokot/machine:nvidia --owner chelokot
 The CLI and dev container images are signed keylessly through GitHub OIDC:
 
 ```sh
-cosign verify ghcr.io/chelokot/fedora-toolbox:latest \
-  --certificate-identity-regexp 'https://github.com/chelokot/fedora-toolbox/' \
+cosign verify ghcr.io/chelokot/dev:latest \
+  --certificate-identity-regexp 'https://github.com/chelokot/dev/' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 ```

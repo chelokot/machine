@@ -137,7 +137,7 @@ fn records_round_trip_through_remote() {
     git(root.path(), &["init", "--quiet", "--bare", "-b", "main", remote.to_str().unwrap()]);
     git(root.path(), &["clone", "--quiet", remote.to_str().unwrap(), seed.to_str().unwrap()]);
     fs::create_dir(seed.join("packages")).unwrap();
-    fs::write(seed.join("packages/dnf.txt"), "# toolbox packages\ngit\nzip\n").unwrap();
+    fs::write(seed.join("packages/dnf.txt"), "# dev packages\ngit\nzip\n").unwrap();
     fs::write(seed.join("packages/dnf-remove.txt"), "").unwrap();
     git(&seed, &["add", "."]);
     git(&seed, &["commit", "--quiet", "-m", "seed"]);
@@ -158,9 +158,9 @@ fn records_round_trip_through_remote() {
     let remote_file = |name: &str| git(&remote, &["show", &format!("main:packages/{name}")]);
 
     apply(&target, &change(Manager::Dnf, Action::Add, &["htop", "Bat"])).unwrap();
-    assert_eq!(remote_file("dnf.txt"), "# toolbox packages\nBat\ngit\nhtop\nzip\n");
+    assert_eq!(remote_file("dnf.txt"), "# dev packages\nBat\ngit\nhtop\nzip\n");
     apply(&target, &change(Manager::Dnf, Action::Remove, &["htop", "nano"])).unwrap();
-    assert_eq!(remote_file("dnf.txt"), "# toolbox packages\nBat\ngit\nzip\n");
+    assert_eq!(remote_file("dnf.txt"), "# dev packages\nBat\ngit\nzip\n");
     assert_eq!(remote_file("dnf-remove.txt"), "");
     apply(&target, &change(Manager::Dnf, Action::Add, &["nano"])).unwrap();
 

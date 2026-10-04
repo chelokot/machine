@@ -56,7 +56,7 @@ impl Manager {
     fn rules(self) -> Rules {
         match self {
             Manager::Dnf => Rules {
-                repo: Repo::Toolbox,
+                repo: Repo::Dev,
                 manifest: "packages/dnf.txt",
                 removed: Some("packages/dnf-remove.txt"),
                 subcommands: &[
@@ -92,7 +92,7 @@ impl Manager {
                 spec: package_spec,
             },
             Manager::Pipx => Rules {
-                repo: Repo::Toolbox,
+                repo: Repo::Dev,
                 manifest: "packages/pipx.txt",
                 removed: None,
                 subcommands: &[("install", Action::Add), ("uninstall", Action::Remove)],
@@ -102,7 +102,7 @@ impl Manager {
                 spec: package_spec,
             },
             Manager::Npm => Rules {
-                repo: Repo::Toolbox,
+                repo: Repo::Dev,
                 manifest: "packages/npm.txt",
                 removed: None,
                 subcommands: &[
@@ -121,7 +121,7 @@ impl Manager {
                 spec: package_spec,
             },
             Manager::Bun => Rules {
-                repo: Repo::Toolbox,
+                repo: Repo::Dev,
                 manifest: "packages/bun.txt",
                 removed: None,
                 subcommands: &[

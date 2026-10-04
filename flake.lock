@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "dev": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1791116933,
+        "narHash": "sha256-s8ozLN2ITXbeUB9PeFvg6mTLDBuCWs+to3PYvcE3zww=",
+        "owner": "chelokot",
+        "repo": "dev",
+        "rev": "d4a08fd3dc7cc88a03d774b89a9a50c91623f5e8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "chelokot",
+        "repo": "dev",
+        "type": "github"
+      }
+    },
     "exposedcat-dotfiles": {
       "flake": false,
       "locked": {
@@ -14,22 +30,6 @@
         "owner": "ExposedCat",
         "repo": "dotfiles",
         "rev": "0b9071e95f67f67dabb917d761a4fa2948c1148e",
-        "type": "github"
-      }
-    },
-    "fedora-toolbox": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1791069816,
-        "narHash": "sha256-Z478G+dsE5lngMQFz5F20Dz4wZJ0cJN0L7LLrv1K9oY=",
-        "owner": "chelokot",
-        "repo": "fedora-toolbox",
-        "rev": "2dffe2b9aaf3b38e7d84e11cc858ca615edcf075",
-        "type": "github"
-      },
-      "original": {
-        "owner": "chelokot",
-        "repo": "fedora-toolbox",
         "type": "github"
       }
     },
@@ -71,8 +71,8 @@
     },
     "root": {
       "inputs": {
+        "dev": "dev",
         "exposedcat-dotfiles": "exposedcat-dotfiles",
-        "fedora-toolbox": "fedora-toolbox",
         "home-manager": "home-manager",
         "nixpkgs": "nixpkgs",
         "starship-show-on-command": "starship-show-on-command"

@@ -12,8 +12,8 @@ pub const EXTENSIONS: &str = "home/gnome-extensions.txt";
 pub const FLATPAKS: &str = "home/flatpaks.txt";
 pub const CAPTURED: [&str; 3] = [DCONF, EXTENSIONS, FLATPAKS];
 const CONTAINER_APPS: &str = "home/container-apps.txt";
-const CONTAINER: &str = "fedora-toolbox";
-const EXPORT_PREFIX: &str = "fedora-toolbox-";
+const CONTAINER: &str = "dev";
+const EXPORT_PREFIX: &str = "dev-";
 const ICON_CANDIDATES: [&str; 5] = [
     "/usr/share/pixmaps/{}.png",
     "/usr/share/icons/hicolor/512x512/apps/{}.png",

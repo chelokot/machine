@@ -2,21 +2,21 @@
   config,
   lib,
   pkgs,
-  fedora-toolbox,
+  dev,
   ...
 }:
 let
-  name = "fedora-toolbox";
+  name = "dev";
+  image = "ghcr.io/chelokot/${name}:latest";
 in
 {
   xdg.configFile."containers/systemd/${name}.container".text =
     lib.generators.toINI { listsAsDuplicateKeys = true; }
       {
-        Unit.Description = "Development container from ghcr.io/chelokot/fedora-toolbox";
+        Unit.Description = "Development container from ${image}";
         Container = {
           ContainerName = name;
-          Image = "ghcr.io/chelokot/fedora-toolbox:latest";
-          AutoUpdate = "registry";
+          Image = image;
           Pull = "newer";
           UserNS = "keep-id";
           SecurityLabelDisable = true;
@@ -55,23 +55,33 @@ in
 
   systemd.user = {
     services."${name}-update" = {
-      Unit.Description = "Pull the latest ${name} image and restart the container";
+      Unit.Description = "Pull the latest ${name} image and restart the container once nothing runs in it";
       Service = {
         Type = "oneshot";
-        ExecStart = "/usr/bin/podman auto-update";
+        ExecStart = lib.getExe (
+          pkgs.writeShellApplication {
+            name = "${name}-update";
+            text = ''
+              /usr/bin/podman pull --quiet ${image} > /dev/null
+              running="$(/usr/bin/podman container inspect --format '{{.Image}}' ${name})"
+              latest="$(/usr/bin/podman image inspect --format '{{.Id}}' ${image})"
+              cgroup="/sys/fs/cgroup$(/usr/bin/podman container inspect --format '{{.State.CgroupPath}}' ${name})"
+              if [ "$running" != "$latest" ] && [ "$(wc -l < "$cgroup/cgroup.procs")" -eq 1 ]; then
+                /usr/bin/systemctl --user restart ${name}.service
+              fi
+            '';
+          }
+        );
       };
     };
     timers."${name}-update" = {
-      Unit.Description = "Daily ${name} image update";
-      Timer = {
-        OnCalendar = "04:00";
-        Persistent = true;
-      };
+      Unit.Description = "Hourly ${name} image update";
+      Timer.OnCalendar = "hourly";
       Install.WantedBy = [ "timers.target" ];
     };
   };
 
   home.packages = [
-    (pkgs.writeScriptBin "dev" (builtins.readFile "${fedora-toolbox}/host/fedora-toolbox-fast-shell"))
+    (pkgs.writeScriptBin "dev" (builtins.readFile "${dev}/host/dev"))
   ];
 }

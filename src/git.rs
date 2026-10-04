@@ -7,21 +7,21 @@ use anyhow::{Context, Result, bail};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Repo {
-    Toolbox,
+    Dev,
     Machine,
 }
 
 impl Repo {
     pub fn name(self) -> &'static str {
         match self {
-            Repo::Toolbox => "chelokot/fedora-toolbox",
+            Repo::Dev => "chelokot/dev",
             Repo::Machine => "chelokot/machine",
         }
     }
 
     pub fn target(self, home: &Path) -> Target {
         let (checkout_variable, remote_variable, directory) = match self {
-            Repo::Toolbox => ("MACHINE_TOOLBOX_REPO", "MACHINE_TOOLBOX_REMOTE", "fedora-toolbox"),
+            Repo::Dev => ("MACHINE_DEV_REPO", "MACHINE_DEV_REMOTE", "dev"),
             Repo::Machine => ("MACHINE_REPO", "MACHINE_REMOTE", "machine"),
         };
         Target {

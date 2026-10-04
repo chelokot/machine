@@ -7,8 +7,8 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    fedora-toolbox = {
-      url = "github:chelokot/fedora-toolbox";
+    dev = {
+      url = "github:chelokot/dev";
       flake = false;
     };
     starship-show-on-command = {

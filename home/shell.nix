@@ -1,7 +1,7 @@
 {
   config,
   lib,
-  fedora-toolbox,
+  dev,
   starship-show-on-command,
   exposedcat-dotfiles,
   ...
@@ -35,14 +35,14 @@ in
     interactiveShellInit = ''
       set -g fish_greeting
       ${colors}
-      ${builtins.readFile "${fedora-toolbox}/fish/config.fish"}
+      ${builtins.readFile "${dev}/fish/config.fish"}
     '';
   };
 
   programs.starship = {
     enable = true;
     enableFishIntegration = false;
-    settings = lib.importTOML "${fedora-toolbox}/starship.toml";
+    settings = lib.importTOML "${dev}/starship.toml";
   };
 
   programs.bash = {

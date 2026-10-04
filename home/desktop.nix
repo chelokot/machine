@@ -16,7 +16,7 @@ in
     run mkdir -p "$(dirname "$config")"
     run touch "$config"
     run ${lib.getExe pkgs.gnused} -i '/^startup_launch_target=/d' "$config"
-    run sh -c 'echo startup_launch_target=toolbox:fedora-toolbox >> "$1"' _ "$config"
+    run sh -c 'echo startup_launch_target=toolbox:dev >> "$1"' _ "$config"
   '';
 
   home.packages = [
