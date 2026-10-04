@@ -11,6 +11,7 @@
     ./desktop.nix
     ./container.nix
     ./sync.nix
+    ./disk.nix
   ];
 
   home = {

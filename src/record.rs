@@ -206,10 +206,6 @@ impl Manifest {
         &self.entries
     }
 
-    fn contains(&self, spec: &str) -> bool {
-        self.entries.iter().any(|entry| entry == spec)
-    }
-
     pub fn write(mut self, path: &Path, add: &[&String], remove: &[&String]) -> Result<()> {
         self.entries.retain(|entry| !remove.contains(&entry));
         self.entries.extend(add.iter().map(|spec| spec.to_string()));
@@ -225,17 +221,16 @@ pub fn edit(root: &Path, change: &Change) -> Result<()> {
     let manifest_path = root.join(rules.manifest);
     let manifest = Manifest::read(&manifest_path)?;
     let specs: Vec<&String> = change.specs.iter().collect();
-    let undeclared: Vec<&String> = specs.iter().copied().filter(|spec| !manifest.contains(spec)).collect();
     match change.action {
         Action::Add => manifest.write(&manifest_path, &specs, &[])?,
         Action::Remove => manifest.write(&manifest_path, &[], &specs)?,
     }
-    let Some(removed) = rules.removed else { return Ok(()) };
-    let removed_path = root.join(removed);
-    let removed_manifest = Manifest::read(&removed_path)?;
-    match change.action {
-        Action::Add => removed_manifest.write(&removed_path, &[], &specs),
-        Action::Remove => removed_manifest.write(&removed_path, &undeclared, &[]),
+    match (change.action, rules.removed) {
+        (Action::Add, Some(removed)) => {
+            let removed_path = root.join(removed);
+            Manifest::read(&removed_path)?.write(&removed_path, &[], &specs)
+        }
+        _ => Ok(()),
     }
 }
 

@@ -187,13 +187,15 @@ fn main() -> ExitCode {
             checkout.pull()?;
             checkout.push()?;
             switch(&checkout.root, &host)?;
-            desktop::apply(&checkout.root, &state(&home))
+            desktop::apply(&checkout.root, &state(&home))?;
+            desktop::export_container_apps(&checkout.root, &home, &env::var("USER")?)
         }),
         Commands::Bootstrap { host } => home().and_then(|home| {
             let checkout = Checkout::open(&Repo::Machine.target(&home))?;
             checkout.pull()?;
             switch(&checkout.root, &host)?;
-            desktop::apply(&checkout.root, &state(&home))
+            desktop::apply(&checkout.root, &state(&home))?;
+            desktop::export_container_apps(&checkout.root, &home, &env::var("USER")?)
         }),
     };
     match result {

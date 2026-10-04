@@ -161,8 +161,6 @@ fn records_round_trip_through_remote() {
     assert_eq!(remote_file("dnf.txt"), "# toolbox packages\nBat\ngit\nhtop\nzip\n");
     apply(&target, &change(Manager::Dnf, Action::Remove, &["htop", "nano"])).unwrap();
     assert_eq!(remote_file("dnf.txt"), "# toolbox packages\nBat\ngit\nzip\n");
-    assert_eq!(remote_file("dnf-remove.txt"), "nano\n");
-    apply(&target, &change(Manager::Dnf, Action::Add, &["nano"])).unwrap();
     assert_eq!(remote_file("dnf-remove.txt"), "");
     apply(&target, &change(Manager::Dnf, Action::Add, &["nano"])).unwrap();
 

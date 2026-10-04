@@ -5,7 +5,9 @@ in
 {
   home.activation.dconf = lib.hm.dag.entryAfter [ "writeBoundary" ] (
     lib.concatMapStrings (file: ''
-      run ${lib.getExe pkgs.dconf} load /${lib.replaceStrings [ "." ] [ "/" ] (lib.removeSuffix ".ini" file)}/ < ${./dconf + "/${file}"}
+      run ${lib.getExe pkgs.dconf} load /${
+        lib.replaceStrings [ "." ] [ "/" ] (lib.removeSuffix ".ini" file)
+      }/ < ${./dconf + "/${file}"}
     '') dconfFiles
   );
 

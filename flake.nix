@@ -52,7 +52,10 @@
         nativeCheckInputs = [ pkgs.git ];
       };
       manifest =
-        path: lib.filter (line: line != "" && !lib.hasPrefix "#" line) (lib.splitString "\n" (builtins.readFile path));
+        path:
+        lib.filter (line: line != "" && !lib.hasPrefix "#" line) (
+          lib.splitString "\n" (builtins.readFile path)
+        );
       home =
         host:
         home-manager.lib.homeManagerConfiguration {
@@ -60,7 +63,7 @@
           extraSpecialArgs = inputs // {
             inherit machine manifest host;
           };
-          modules = [ ./home ];
+          modules = [ ./home ] ++ lib.optional (builtins.pathExists ./hosts/${host}.nix) ./hosts/${host}.nix;
         };
     in
     {
@@ -95,7 +98,9 @@
           pkgs.runCommand "quadlet-check"
             {
               nativeBuildInputs = [ pkgs.podman ];
-              unit = "${self.homeConfigurations."chelokot@laptop".activationPackage}/home-files/.config/containers/systemd";
+              unit = "${
+                self.homeConfigurations."chelokot@laptop".activationPackage
+              }/home-files/.config/containers/systemd";
             }
             ''
               export HOME=$TMPDIR XDG_RUNTIME_DIR=$TMPDIR

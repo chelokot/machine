@@ -11,6 +11,16 @@ pub const DCONF: &str = "home/dconf";
 pub const EXTENSIONS: &str = "home/gnome-extensions.txt";
 pub const FLATPAKS: &str = "home/flatpaks.txt";
 pub const CAPTURED: [&str; 3] = [DCONF, EXTENSIONS, FLATPAKS];
+const CONTAINER_APPS: &str = "home/container-apps.txt";
+const CONTAINER: &str = "fedora-toolbox";
+const EXPORT_PREFIX: &str = "fedora-toolbox-";
+const ICON_CANDIDATES: [&str; 5] = [
+    "/usr/share/pixmaps/{}.png",
+    "/usr/share/icons/hicolor/512x512/apps/{}.png",
+    "/usr/share/icons/hicolor/256x256/apps/{}.png",
+    "/usr/share/icons/hicolor/scalable/apps/{}.svg",
+    "/usr/share/pixmaps/{}.svg",
+];
 const FLATPAK_REMOTES: &str = "home/flatpak-remotes.txt";
 const IGNORED_KEYS: &str = "home/dconf/ignored-keys.txt";
 const EXTENSIONS_SITE: &str = "https://extensions.gnome.org";
@@ -152,4 +162,51 @@ pub fn apply(root: &Path, state: &Path) -> Result<()> {
         run("gnome-extensions", &["install", "--force", &archive.to_string_lossy()])?;
     }
     remember(&state.join("gnome-extensions.txt"), &local_extensions()?)
+}
+
+pub fn export_container_apps(root: &Path, home: &Path, user: &str) -> Result<()> {
+    let applications = home.join(".local/share/applications");
+    let icons = home.join(".local/share/icons");
+    fs::create_dir_all(&applications)?;
+    fs::create_dir_all(&icons)?;
+    let apps = Manifest::read(&root.join(CONTAINER_APPS))?.entries().to_vec();
+    let launcher = format!("podman exec --user {user} --workdir {} {CONTAINER} ", home.display());
+    for app in &apps {
+        let desktop_file = format!("/usr/share/applications/{app}.desktop");
+        if run("podman", &["exec", CONTAINER, "test", "-f", &desktop_file]).is_err() {
+            eprintln!("machine: {app} is not installed in {CONTAINER} yet, skipping its launcher");
+            continue;
+        }
+        let entry = run("podman", &["exec", CONTAINER, "cat", &desktop_file])?;
+        let candidates = ICON_CANDIDATES.map(|pattern| pattern.replace("{}", app)).join(" ");
+        let found = run("podman", &["exec", CONTAINER, "sh", "-c", &format!("for path in {candidates}; do [ -f \"$path\" ] && echo \"$path\" && break; done")])?;
+        let icon = match found.trim() {
+            "" => None,
+            source => {
+                let extension = Path::new(source).extension().context("icon has no extension")?.to_string_lossy();
+                let target = icons.join(format!("{EXPORT_PREFIX}{app}.{extension}"));
+                run("podman", &["cp", &format!("{CONTAINER}:{source}"), &target.to_string_lossy()])?;
+                Some(target)
+            }
+        };
+        let exported: String = entry
+            .lines()
+            .filter(|line| !line.starts_with("TryExec="))
+            .map(|line| match (line.strip_prefix("Exec="), line.starts_with("Icon="), &icon) {
+                (Some(command), _, _) => format!("Exec={launcher}{command}\n"),
+                (None, true, Some(path)) => format!("Icon={}\n", path.display()),
+                _ => format!("{line}\n"),
+            })
+            .collect();
+        fs::write(applications.join(format!("{EXPORT_PREFIX}{app}.desktop")), exported)?;
+    }
+    for entry in fs::read_dir(&applications)? {
+        let path = entry?.path();
+        let name = path.file_name().context("desktop entry has no name")?.to_string_lossy().into_owned();
+        let exported_app = name.strip_prefix(EXPORT_PREFIX).and_then(|rest| rest.strip_suffix(".desktop"));
+        if exported_app.is_some_and(|app| !apps.iter().any(|wanted| wanted == app)) {
+            fs::remove_file(path)?;
+        }
+    }
+    run("update-desktop-database", &[&applications.to_string_lossy()]).map(drop)
 }
