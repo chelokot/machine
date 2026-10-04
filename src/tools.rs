@@ -13,6 +13,7 @@ pub const UV: &str = "packages/uv.txt";
 pub const GO: &str = "packages/go.txt";
 pub const CAPTURED: [&str; 3] = [CARGO, UV, GO];
 const CRATES_IO_SOURCES: [&str; 2] = ["(registry+https://github.com/rust-lang/crates.io-index)", "(sparse+https://index.crates.io/)"];
+const NIX_STORE: &str = "/nix/store";
 const GO_BUILDINFO_MAGIC: &[u8] = b"\xff Go buildinf:";
 const GO_BUILDINFO_HEADER: usize = 32;
 const GO_BUILDINFO_INLINE: u8 = 0x2;
@@ -195,7 +196,7 @@ pub fn undeclared(home: &Path, search_path: &str) -> Result<Vec<String>> {
     for link in links {
         let directory = link.parent().context("link has no directory")?;
         let target = normalize(&directory.join(fs::read_link(&link)?));
-        if recorded_roots.iter().any(|root| target.starts_with(root)) {
+        if target.starts_with(NIX_STORE) || recorded_roots.iter().any(|root| target.starts_with(root)) {
             continue;
         }
         let name = file_name(&link)?;
@@ -215,6 +216,9 @@ pub fn undeclared(home: &Path, search_path: &str) -> Result<Vec<String>> {
     }));
     lines.sort();
     for installation in entries(&opt)? {
+        if fs::read_link(&installation).is_ok_and(|target| target.starts_with(NIX_STORE)) {
+            continue;
+        }
         lines.push(match opt_links.get(&installation) {
             Some(links) => format!("{} ({})", shown(&installation), links.join(", ")),
             None => shown(&installation),

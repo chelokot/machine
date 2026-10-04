@@ -96,6 +96,9 @@ fn reports_only_programs_no_repository_declares() {
         r#"{"installs":{"wasm-pack 0.13.1 (sparse+https://index.crates.io/)":{"bins":["wasm-pack"]}}}"#,
     );
     write(&home.join(".nix-profile/bin/machine"), "binary");
+    fs::create_dir_all(home.join(".local/opt")).unwrap();
+    symlink("/nix/store/0000-godot-4.6.3", home.join(".local/opt/godot-4.6.3")).unwrap();
+    symlink("/nix/store/0000-home-manager-files/.local/bin/blender", home.join(".local/bin/blender")).unwrap();
     let path = [".local/bin", ".bun/bin", ".cargo/bin", ".elan/bin", ".nix-profile/bin", ".local/bin"]
         .map(|directory| home.join(directory).display().to_string())
         .join(":")
