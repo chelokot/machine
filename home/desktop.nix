@@ -17,6 +17,9 @@ in
 
   home.packages = [
     (pkgs.writeShellScriptBin "flatpak" ''
+      if [ -e /run/.containerenv ]; then
+        exec host-spawn flatpak "$@"
+      fi
       /usr/bin/flatpak "$@"
       status=$?
       if [ "$status" -eq 0 ]; then
@@ -32,6 +35,9 @@ in
       exit "$status"
     '')
     (pkgs.writeShellScriptBin "rpm-ostree" ''
+      if [ -e /run/.containerenv ]; then
+        exec host-spawn rpm-ostree "$@"
+      fi
       /usr/bin/rpm-ostree "$@"
       status=$?
       if [ "$status" -eq 0 ]; then
