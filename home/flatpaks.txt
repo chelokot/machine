@@ -37,6 +37,7 @@ system flathub org.kde.kdenlive
 system flathub org.mozilla.firefox
 system flathub org.telegram.desktop
 system flathub us.zoom.Zoom
+system gale com.kesomannen.gale
 user chelotype com.chelokot.Chelotype
 user flatpark com.anthropic.ClaudeDesktop
 user sele-origin com.chipichapa.sele
