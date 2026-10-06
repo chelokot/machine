@@ -44,15 +44,11 @@ fn dnf_remove_and_ignored_invocations() {
 }
 
 #[test]
-fn npm_and_bun_record_only_global_installs() {
+fn npm_records_only_global_installs() {
     assert_eq!(parse(Manager::Npm, &args(&["install", "left-pad"])), None);
     assert_eq!(
         parse(Manager::Npm, &args(&["i", "-g", "prettier"])),
         Some(change(Manager::Npm, Action::Add, &["prettier"]))
-    );
-    assert_eq!(
-        parse(Manager::Bun, &args(&["remove", "--global", "@openai/codex"])),
-        Some(change(Manager::Bun, Action::Remove, &["@openai/codex"]))
     );
 }
 

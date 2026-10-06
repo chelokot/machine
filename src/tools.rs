@@ -11,7 +11,8 @@ use crate::desktop::merge;
 pub const CARGO: &str = "packages/cargo.txt";
 pub const UV: &str = "packages/uv.txt";
 pub const GO: &str = "packages/go.txt";
-pub const CAPTURED: [&str; 3] = [CARGO, UV, GO];
+pub const BUN: &str = "packages/bun.txt";
+pub const CAPTURED: [&str; 4] = [CARGO, UV, GO, BUN];
 const CRATES_IO_SOURCES: [&str; 2] = ["(registry+https://github.com/rust-lang/crates.io-index)", "(sparse+https://index.crates.io/)"];
 const NIX_STORE: &str = "/nix/store";
 const GO_BUILDINFO_MAGIC: &[u8] = b"\xff Go buildinf:";
@@ -35,15 +36,19 @@ fn file_name(path: &Path) -> Result<String> {
     Ok(path.file_name().context("path has no name")?.to_string_lossy().into_owned())
 }
 
+fn read_json(path: &Path) -> Result<Option<serde_json::Value>> {
+    match fs::read_to_string(path) {
+        Ok(text) => Ok(Some(serde_json::from_str(&text)?)),
+        Err(error) if error.kind() == ErrorKind::NotFound => Ok(None),
+        Err(error) => Err(error.into()),
+    }
+}
+
 pub fn cargo_crates(home: &Path) -> Result<BTreeMap<String, Vec<String>>> {
     let path = home.join(".cargo/.crates2.json");
-    let text = match fs::read_to_string(&path) {
-        Ok(text) => text,
-        Err(error) if error.kind() == ErrorKind::NotFound => return Ok(BTreeMap::new()),
-        Err(error) => return Err(error.into()),
-    };
-    let installs: serde_json::Map<String, serde_json::Value> = serde_json::from_value(serde_json::from_str::<serde_json::Value>(&text)?["installs"].clone())
-        .with_context(|| format!("{} has no installs", path.display()))?;
+    let Some(manifest) = read_json(&path)? else { return Ok(BTreeMap::new()) };
+    let installs: serde_json::Map<String, serde_json::Value> =
+        serde_json::from_value(manifest["installs"].clone()).with_context(|| format!("{} has no installs", path.display()))?;
     installs
         .iter()
         .filter(|(key, _)| CRATES_IO_SOURCES.iter().any(|source| key.ends_with(source)))
@@ -53,6 +58,16 @@ pub fn cargo_crates(home: &Path) -> Result<BTreeMap<String, Vec<String>>> {
             Ok((name, bins))
         })
         .collect()
+}
+
+pub fn bun_globals(home: &Path) -> Result<BTreeSet<String>> {
+    let path = home.join(".bun/install/global/package.json");
+    let Some(manifest) = read_json(&path)? else { return Ok(BTreeSet::new()) };
+    let dependencies: serde_json::Map<String, serde_json::Value> = match manifest.get("dependencies") {
+        Some(dependencies) => serde_json::from_value(dependencies.clone()).with_context(|| format!("{} has malformed dependencies", path.display()))?,
+        None => serde_json::Map::new(),
+    };
+    Ok(dependencies.into_iter().map(|(name, _)| name).collect())
 }
 
 pub fn uv_tools(home: &Path) -> Result<BTreeSet<String>> {
@@ -104,7 +119,8 @@ pub fn go_packages(home: &Path) -> Result<BTreeMap<PathBuf, String>> {
 pub fn capture(root: &Path, home: &Path, state: &Path) -> Result<()> {
     merge(&root.join(CARGO), &state.join("cargo.txt"), &cargo_crates(home)?.into_keys().collect())?;
     merge(&root.join(UV), &state.join("uv.txt"), &uv_tools(home)?)?;
-    merge(&root.join(GO), &state.join("go.txt"), &go_packages(home)?.into_values().collect())
+    merge(&root.join(GO), &state.join("go.txt"), &go_packages(home)?.into_values().collect())?;
+    merge(&root.join(BUN), &state.join("bun.txt"), &bun_globals(home)?)
 }
 
 fn pip_user_scripts(home: &Path) -> Result<BTreeMap<String, String>> {

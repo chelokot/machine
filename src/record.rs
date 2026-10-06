@@ -10,7 +10,6 @@ pub enum Manager {
     Dnf,
     Pipx,
     Npm,
-    Bun,
     RpmOstree,
 }
 
@@ -44,7 +43,6 @@ impl Manager {
             Manager::Dnf => "dnf",
             Manager::Pipx => "pipx",
             Manager::Npm => "npm",
-            Manager::Bun => "bun",
             Manager::RpmOstree => "rpm-ostree",
         }
     }
@@ -118,22 +116,6 @@ impl Manager {
                 value_options: &["--registry", "--tag", "--cache", "--userconfig", "--workspace", "-w"],
                 skip_flags: &["--prefix", "--dry-run"],
                 global_flags: &["-g", "--global", "--location=global"],
-                spec: package_spec,
-            },
-            Manager::Bun => Rules {
-                repo: Repo::Dev,
-                manifest: "packages/bun.txt",
-                removed: None,
-                subcommands: &[
-                    ("add", Action::Add),
-                    ("install", Action::Add),
-                    ("i", Action::Add),
-                    ("remove", Action::Remove),
-                    ("rm", Action::Remove),
-                ],
-                value_options: &["--registry", "--cwd", "--config", "-c", "--backend", "--cache-dir"],
-                skip_flags: &["--dry-run", "--cwd"],
-                global_flags: &["-g", "--global"],
                 spec: package_spec,
             },
             Manager::RpmOstree => Rules {

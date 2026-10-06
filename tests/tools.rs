@@ -4,7 +4,7 @@ use std::path::Path;
 use std::process::Command;
 
 use machine::desktop::{FILES, capture_files};
-use machine::tools::{CARGO, GO, UV, capture, go_package, undeclared};
+use machine::tools::{BUN, CARGO, GO, UV, capture, go_package, undeclared};
 
 fn write(path: &Path, contents: &str) {
     fs::create_dir_all(path.parent().unwrap()).unwrap();
@@ -38,7 +38,7 @@ fn reads_the_package_path_of_a_go_binary() {
 }
 
 #[test]
-fn captures_crates_io_crates_uv_tools_and_go_binaries() {
+fn captures_crates_uv_tools_go_binaries_and_bun_globals() {
     let root = tempfile::tempdir().unwrap();
     let home = root.path().join("home");
     let repo = root.path().join("repo");
@@ -56,6 +56,10 @@ fn captures_crates_io_crates_uv_tools_and_go_binaries() {
     fs::create_dir_all(&go_build).unwrap();
     write(&home.join("go/bin/hello"), "");
     fs::write(home.join("go/bin/hello"), build_go_binary(&go_build, "example.com/tools/hello")).unwrap();
+    write(
+        &home.join(".bun/install/global/package.json"),
+        r#"{"dependencies":{"@openai/codex":"^0.160.1","prettier":"^3.6.0"}}"#,
+    );
     write(&repo.join(CARGO), "# cargo install\nwasm-pack\n");
 
     capture(&repo, &home, &root.path().join("state")).unwrap();
@@ -63,6 +67,7 @@ fn captures_crates_io_crates_uv_tools_and_go_binaries() {
     assert_eq!(fs::read_to_string(repo.join(CARGO)).unwrap(), "# cargo install\nripgrep\nwasm-pack\n");
     assert_eq!(fs::read_to_string(repo.join(UV)).unwrap(), "ruff\n");
     assert_eq!(fs::read_to_string(repo.join(GO)).unwrap(), "example.com/tools/hello\n");
+    assert_eq!(fs::read_to_string(repo.join(BUN)).unwrap(), "@openai/codex\nprettier\n");
 }
 
 #[test]
