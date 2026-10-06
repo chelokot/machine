@@ -8,6 +8,7 @@
   imports = [
     ./shell.nix
     ./git.nix
+    ./glab.nix
     ./desktop.nix
     ./container.nix
     ./sync.nix

@@ -52,6 +52,7 @@ nix run github:chelokot/machine -- bootstrap laptop # or server
 | `machine capture` | Commits current GNOME settings, app config files, extensions, flatpaks and home-installed tools |
 | `machine status` | Lists programs in `$HOME` (`PATH` directories, `~/.local/opt`, `pip --user`) that no repository declares |
 | `machine sync` | Capture, pull, push, `home-manager switch`, install missing flatpaks and extensions |
+| `systemctl --user start glab-token` | Logs `glab` in to GitLab with a 30-day token minted over SSH and revokes the previous one; runs weekly |
 
 Recording failures are logged to `~/.local/state/machine/record.log`; `MACHINE_RECORD=0` skips recording for one command.
 
