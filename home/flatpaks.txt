@@ -39,5 +39,6 @@ system flathub org.telegram.desktop
 system flathub us.zoom.Zoom
 system gale com.kesomannen.gale
 user chelotype com.chelokot.Chelotype
+user flathub org.prismlauncher.PrismLauncher
 user flatpark com.anthropic.ClaudeDesktop
 user sele-origin com.chipichapa.sele
