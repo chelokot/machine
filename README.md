@@ -53,6 +53,7 @@ nix run github:chelokot/machine -- bootstrap laptop # or server
 | `machine status` | Lists programs in `$HOME` (`PATH` directories, `~/.local/opt`, `pip --user`) that no repository declares |
 | `machine sync` | Capture, pull, push, `home-manager switch`, install missing flatpaks and extensions |
 | `systemctl --user start glab-token` | Logs `glab` in to GitLab with a 30-day token minted over SSH and revokes the previous one; runs weekly |
+| `systemctl --user start aws-sso-login` | Logs the AWS CLI in to the `orn` SSO session in a headless browser with the username, password and TOTP seed stored in the keyring under `service aws-sso-login`; runs every six hours on the laptop, a failed attempt leaves `~/.local/state/aws-sso-login/failure.png` |
 
 Recording failures are logged to `~/.local/state/machine/record.log`; `MACHINE_RECORD=0` skips recording for one command.
 
