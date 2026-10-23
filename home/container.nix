@@ -68,6 +68,7 @@ in
               cgroup="/sys/fs/cgroup$(/usr/bin/podman container inspect --format '{{.State.CgroupPath}}' ${name})"
               if [ "$running" != "$latest" ] && [ "$(wc -l < "$cgroup/cgroup.procs")" -eq 1 ]; then
                 /usr/bin/systemctl --user restart ${name}.service
+                /usr/bin/podman image rm "$running" > /dev/null
               fi
             '';
           }
