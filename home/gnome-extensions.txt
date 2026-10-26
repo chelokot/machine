@@ -1,2 +1,3 @@
 blur-my-shell@aunetx
 notification-configurator@exposedcat
+snowy@exposedcat
