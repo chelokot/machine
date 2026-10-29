@@ -8,6 +8,7 @@ system flathub com.obsproject.Studio
 system flathub com.rustdesk.RustDesk
 system flathub com.usebruno.Bruno
 system flathub com.valvesoftware.Steam
+system flathub dev.neovide.neovide
 system flathub dev.vencord.Vesktop
 system flathub dev.zed.Zed
 system flathub io.bassi.Amberol
