@@ -41,5 +41,6 @@ system gale com.kesomannen.gale
 user chelotype com.chelokot.Chelotype
 user flathub com.unity.UnityHub
 user flathub org.prismlauncher.PrismLauncher
+user flathub org.qbittorrent.qBittorrent
 user flatpark com.anthropic.ClaudeDesktop
 user sele-origin com.chipichapa.sele
