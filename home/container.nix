@@ -38,6 +38,7 @@ in
             "HOME=${config.home.homeDirectory}"
             "XDG_RUNTIME_DIR=/run/user/%U"
             "DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/%U/bus"
+            "XDG_SESSION_TYPE=wayland"
             "WAYLAND_DISPLAY=wayland-0"
             "DISPLAY=:0"
             "NIX_REMOTE=daemon"
@@ -82,7 +83,10 @@ in
     };
   };
 
-  home.packages = [
-    (pkgs.writeScriptBin "dev" (builtins.readFile "${dev}/host/dev"))
-  ];
+  home.packages =
+    map (command: pkgs.writeScriptBin command (builtins.readFile "${dev}/host/${command}"))
+      [
+        "dev"
+        "t3code"
+      ];
 }

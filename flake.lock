@@ -3,11 +3,11 @@
     "dev": {
       "flake": false,
       "locked": {
-        "lastModified": 1791116933,
-        "narHash": "sha256-s8ozLN2ITXbeUB9PeFvg6mTLDBuCWs+to3PYvcE3zww=",
+        "lastModified": 1793567657,
+        "narHash": "sha256-1yFWB/GCJen8Vie8OB4N6+SMYpf49gxpGGvHGfSBCEI=",
         "owner": "chelokot",
         "repo": "dev",
-        "rev": "d4a08fd3dc7cc88a03d774b89a9a50c91623f5e8",
+        "rev": "6073f2937f42fc4eb6bd70e42d1f97a61c0cc20b",
         "type": "github"
       },
       "original": {
