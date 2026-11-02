@@ -35,7 +35,6 @@ in
         Container = {
           ContainerName = "${name}-%i";
           Image = image;
-          Pull = "newer";
           UserNS = "keep-id";
           SecurityLabelDisable = true;
           Network = "host";
@@ -66,6 +65,7 @@ in
         Service = {
           Restart = "always";
           SuccessExitStatus = 143;
+          TimeoutStartSec = "15min";
           ExecStartPost = "${lib.getExe claim} %i";
           ExecStop = "${lib.getExe release} %i";
         };
