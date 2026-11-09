@@ -3,4 +3,3 @@ nix-daemon
 python3.12
 tailscale
 temurin-21-jdk
-ydotool
