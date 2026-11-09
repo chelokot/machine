@@ -102,11 +102,11 @@ fn merge_records_only_local_changes_since_last_observation() {
 
 #[test]
 fn dconf_dump_drops_ignored_keys_and_empty_sections() {
-    let dump = "[/]\ncolor-scheme='prefer-dark'\nwindow-size=(1, 2)\n\n[window-state]\ninitial-size=(3, 4)\n\n[keybindings]\nmaximize=@as []\n";
-    let ignored = vec!["window-size".to_owned(), "initial-size*".to_owned()];
+    let dump = "[/]\ncolor-scheme='prefer-dark'\nwindow-size=(1, 2)\n\n[window-state]\ninitial-size=(3, 4)\n\n[keybindings]\nmaximize=@as []\n\n[extensions/gsconnect]\nname='laptop'\n\n[custom-keybindings/terminal]\nname='Launch terminal'\n";
+    let ignored = vec!["window-size".to_owned(), "initial-size*".to_owned(), "extensions/gsconnect/name".to_owned()];
     assert_eq!(
         filter_dump(dump, &ignored),
-        "[/]\ncolor-scheme='prefer-dark'\n\n[keybindings]\nmaximize=@as []\n"
+        "[/]\ncolor-scheme='prefer-dark'\n\n[keybindings]\nmaximize=@as []\n\n[custom-keybindings/terminal]\nname='Launch terminal'\n"
     );
 }
 

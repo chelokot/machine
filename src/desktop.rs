@@ -54,8 +54,10 @@ pub fn filter_dump(dump: &str, ignored: &[String]) -> String {
     for line in dump.lines().filter(|line| !line.trim().is_empty()) {
         if line.starts_with('[') {
             sections.push((line, Vec::new()));
-        } else if let Some((_, lines)) = sections.last_mut()
-            && !is_ignored(line.split_once('=').map_or(line, |(key, _)| key))
+        } else if let Some((header, lines)) = sections.last_mut()
+            && let key = line.split_once('=').map_or(line, |(key, _)| key)
+            && !is_ignored(key)
+            && !is_ignored(&format!("{}/{key}", header.trim_matches(['[', ']'])))
         {
             lines.push(line);
         }
