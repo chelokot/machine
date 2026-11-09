@@ -1,4 +1,5 @@
 system flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+system gale https://kesomannen.com/gale.flatpakrepo
 user chelotype https://chelokot.com/flatpak/chelotype.flatpakrepo
 user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 user flatpark https://dl.flatpark.org/flatpark.flatpakrepo
