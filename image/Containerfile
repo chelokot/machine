@@ -3,16 +3,17 @@ FROM ${BASE}
 
 COPY image/repos/ /etc/yum.repos.d/
 COPY image/packages.txt /usr/share/machine/packages.txt
-RUN sed 's/#.*//' /usr/share/machine/packages.txt | xargs dnf -y install && \
+RUN mkdir /var/opt && \
+    sed 's/#.*//' /usr/share/machine/packages.txt | xargs dnf -y install && \
     dnf clean all && \
-    rm -rf /var/lib/dnf /var/cache/libdnf5 /var/cache/ldconfig /var/log/dnf5.log /run/dnf
+    rm -rf /var/opt /var/lib/dnf /var/cache/libdnf5 /var/cache/ldconfig /var/log/dnf5.log /run/dnf
 
 COPY image/files/ /
 RUN jq '.transports.docker["ghcr.io/chelokot/machine"] = [{"type": "sigstoreSigned", "keyPath": "/etc/pki/containers/chelokot-machine.pub", "signedIdentity": {"type": "matchRepository"}}]' \
       /etc/containers/policy.json > /etc/containers/policy.json.new && \
     mv /etc/containers/policy.json.new /etc/containers/policy.json && \
     tee -a /etc/selinux/targeted/contexts/files/file_contexts.local /etc/selinux/targeted/active/file_contexts.local < /usr/share/machine/nix.fc > /dev/null && \
-    systemctl enable nix.mount nix-daemon.socket tailscaled.service && \
+    systemctl enable nix.mount nix-daemon.socket tailscaled.service warp-svc.service && \
     systemctl --global enable podman.socket && \
     systemctl --global mask grub-boot-success.service grub-boot-success.timer && \
     bootc container lint
