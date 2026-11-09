@@ -11,6 +11,7 @@
     ./glab.nix
     ./desktop.nix
     ./container.nix
+    ./anthropic-proxy.nix
     ./sync.nix
     ./tools.nix
   ];
