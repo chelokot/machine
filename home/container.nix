@@ -102,7 +102,7 @@ in
                 /usr/bin/podman rename ${name} "${name}-$previous"
                 /usr/bin/podman rename "${name}-$next" ${name}
               fi
-              /usr/bin/podman ps --filter label=PODMAN_SYSTEMD_UNIT --format '{{.Names}} {{index .Labels "PODMAN_SYSTEMD_UNIT"}}' |
+              /usr/bin/podman ps --filter label=PODMAN_SYSTEMD_UNIT --format '{{.Names}} {{.Label "PODMAN_SYSTEMD_UNIT"}}' |
                 while read -r container unit; do
                   if [ "$container" = ${name} ] || [[ "$unit" != ${name}@* ]]; then
                     continue
