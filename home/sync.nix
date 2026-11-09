@@ -2,7 +2,10 @@
 {
   systemd.user = {
     services.machine-sync = {
-      Unit.Description = "Capture desktop changes, pull chelokot/machine and apply it";
+      Unit = {
+        Description = "Capture desktop changes, pull chelokot/machine and apply it";
+        X-SwitchMethod = "keep-old";
+      };
       Service = {
         Type = "oneshot";
         Environment = "PATH=${config.home.homeDirectory}/.local/bin:${config.home.profileDirectory}/bin:/nix/var/nix/profiles/default/bin:/usr/local/bin:/usr/bin";
