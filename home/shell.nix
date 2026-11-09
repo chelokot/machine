@@ -61,8 +61,12 @@ in
     "$HOME/.local/bin"
     "$HOME/.bun/bin"
     "$HOME/.cargo/bin"
+    "$HOME/.deno/bin"
     "$HOME/.elan/bin"
+    "$HOME/.kimi-code/bin"
+    "$HOME/.maestro/bin"
     "$HOME/.opencode/bin"
+    "$HOME/.tempo/bin"
     "$HOME/.var/app/com.anthropic.ClaudeDesktop/bin"
   ];
 }

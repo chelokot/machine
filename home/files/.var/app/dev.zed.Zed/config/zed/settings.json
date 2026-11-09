@@ -19,8 +19,32 @@
   "git_panel": {
     "dock": "left"
   },
+  "show_signature_help_after_edits": true,
+  "tab_size": 2,
+  "ssh_connections": [
+    {
+      "host": "185.161.108.10",
+      "username": "modelyo",
+      "projects": [
+        {
+          "paths": [
+            "/home/modelyo"
+          ]
+        },
+        {
+          "paths": [
+            "/home/modelyo/tdx"
+          ]
+        }
+      ]
+    }
+  ],
+  "features": {
+    "edit_prediction_provider": "zed"
+  },
   "agent": {
     "dock": "right",
+    "always_allow_tool_actions": true,
     "default_model": {
       "provider": "copilot_chat",
       "model": "gpt-4.1"

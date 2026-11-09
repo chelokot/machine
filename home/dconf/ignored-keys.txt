@@ -1,5 +1,6 @@
 app-picker-layout
 current
+extensions/gsconnect/name
 fallback-in-use
 initial-size*
 last-selected-power-profile
@@ -9,6 +10,8 @@ migrated-gtk-settings
 missing-openssl
 mru-sources
 overridden-settings
+text-scaling-factor
+toolkit-accessibility
 welcome-dialog-last-shown-version
 window-maximized
 window-size
