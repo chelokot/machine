@@ -13,6 +13,7 @@
     ./container.nix
     ./anthropic-proxy.nix
     ./sync.nix
+    ./taildrop.nix
     ./tools.nix
   ];
 
