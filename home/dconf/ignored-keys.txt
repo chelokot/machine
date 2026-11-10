@@ -1,6 +1,8 @@
 app-picker-layout
 current
+extensions/caffeine/indicator-position-max
 extensions/gsconnect/name
+extensions/tilingshell/selected-layouts
 fallback-in-use
 initial-size*
 last-selected-power-profile
