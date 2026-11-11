@@ -23,7 +23,7 @@ login = subprocess.Popen(
     stdout=subprocess.PIPE,
     text=True,
 )
-device_url = next(match.group(0) for line in login.stdout if (match := re.search(r"https://\S+user_code=\S+", line)))
+device_url = next(match.group(0) for line in login.stdout if (match := re.search(r"https://\S+request_uri=\S+", line)))
 
 with sync_playwright() as playwright:
     page = playwright.chromium.launch().new_page()
@@ -35,9 +35,7 @@ with sync_playwright() as playwright:
         page.get_by_role("button", name="Sign in").click()
         page.get_by_label("MFA code").fill(pyotp.TOTP(totp_seed).now())
         page.get_by_role("button", name="Sign in").click()
-        page.get_by_role("button", name="Decline").click()
         page.get_by_role("button", name="Confirm and continue").click()
-        page.get_by_role("button", name="Allow access").click()
         page.get_by_text("Request approved").wait_for()
     except Exception:
         page.screenshot(path=failure_screenshot)
