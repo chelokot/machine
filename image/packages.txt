@@ -1,6 +1,8 @@
 cloudflare-warp
+gstreamer1-plugin-openh264
 nix
 nix-daemon
+openh264
 python3.12
 tailscale
 temurin-21-jdk
