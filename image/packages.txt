@@ -1,4 +1,5 @@
 cloudflare-warp
+fuse-libs
 gstreamer1-plugin-openh264
 nix
 nix-daemon
