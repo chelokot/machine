@@ -56,6 +56,7 @@ fn captures_crates_uv_tools_go_binaries_and_bun_globals() {
     fs::create_dir_all(&go_build).unwrap();
     write(&home.join("go/bin/hello"), "");
     fs::write(home.join("go/bin/hello"), build_go_binary(&go_build, "example.com/tools/hello")).unwrap();
+    fs::write(home.join("go/bin/local-tool"), build_go_binary(&go_build, "local-tool")).unwrap();
     write(
         &home.join(".bun/install/global/package.json"),
         r#"{"dependencies":{"@openai/codex":"^0.160.1","prettier":"^3.6.0"}}"#,
