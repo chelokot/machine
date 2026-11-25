@@ -28,6 +28,8 @@ let
   };
 in
 {
+  xdg.configFile."user-tmpfiles.d/claude-tmp.conf".text = "e /tmp/claude-%U - - - 2d\n";
+
   xdg.configFile."containers/systemd/${name}@.container".text =
     lib.generators.toINI { listsAsDuplicateKeys = true; }
       {
@@ -47,7 +49,7 @@ in
           Volume = [
             "${config.home.homeDirectory}:${config.home.homeDirectory}:rslave"
             "/run/user/%U:/run/user/%U"
-            "/tmp/.X11-unix:/tmp/.X11-unix"
+            "/tmp:/tmp:rslave"
             "/var/mnt:/var/mnt:rslave"
             "/nix:/nix"
           ];
@@ -59,6 +61,7 @@ in
             "WAYLAND_DISPLAY=wayland-0"
             "DISPLAY=:0"
             "NIX_REMOTE=daemon"
+            "TF_PLUGIN_CACHE_DIR=${config.home.homeDirectory}/.cache/terraform/plugin-cache"
           ];
           Exec = "sleep infinity";
         };

@@ -53,4 +53,10 @@ in
       ".local/bin/blender".source = local "blender-4.2.14-linux-x64/blender";
       ".local/bin/godot".source = local "godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64";
     };
+
+  home.sessionVariables.TF_PLUGIN_CACHE_DIR = "${config.home.homeDirectory}/.cache/terraform/plugin-cache";
+
+  home.activation.terraformPluginCache = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    run mkdir -p "${config.home.homeDirectory}/.cache/terraform/plugin-cache"
+  '';
 }
