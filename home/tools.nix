@@ -41,6 +41,7 @@ in
     elan
     gh
     poetry
+    restic
     rustup
     sfizz
     sops
