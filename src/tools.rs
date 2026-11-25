@@ -119,7 +119,11 @@ pub fn go_packages(home: &Path) -> Result<BTreeMap<PathBuf, String>> {
 pub fn capture(root: &Path, home: &Path, state: &Path) -> Result<()> {
     merge(&root.join(CARGO), &state.join("cargo.txt"), &cargo_crates(home)?.into_keys().collect())?;
     merge(&root.join(UV), &state.join("uv.txt"), &uv_tools(home)?)?;
-    merge(&root.join(GO), &state.join("go.txt"), &go_packages(home)?.into_values().collect())?;
+    let go_modules = go_packages(home)?
+        .into_values()
+        .filter(|package| package.split('/').next().is_some_and(|domain| domain.contains('.')))
+        .collect();
+    merge(&root.join(GO), &state.join("go.txt"), &go_modules)?;
     merge(&root.join(BUN), &state.join("bun.txt"), &bun_globals(home)?)
 }
 
